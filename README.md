@@ -15,42 +15,7 @@ The **F1 Era Timeline** is a visually stunning, comprehensive archive of 75 year
 - **Frontend:** React + Vite
 - **Styling:** Vanilla CSS with custom CSS variables for easy theming and responsive design.
 - **Database:** Supabase (PostgreSQL) for blazing-fast, paginated data retrieval.
-- **Routing:** React Router DOM
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-You need Node.js and npm installed on your machine.
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/f1-era-timeline.git
-   ```
-2. Navigate into the directory:
-   ```bash
-   cd f1-era-timeline
-   ```
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
-4. Set up your environment variables. Create a `.env` file in the root directory and add your Supabase keys:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-### Running the App
-
-Start the development server:
-```bash
-npm run dev
-```
-
-The application will be available at `http://localhost:5173`.
+- **Routing:** React Router DOM 
 
 ## 🎨 UI & Design Language
 
