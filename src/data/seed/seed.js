@@ -6,7 +6,7 @@ dotenv.config()
 
 const supabase = createClient(
     process.env.VITE_SUPABASE_URL,
-    process.env.VITE_SUPABASE_ANON_KEY
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
 )
 
 const BASE_URL = 'https://api.jolpi.ca/ergast/f1'
@@ -133,8 +133,8 @@ async function seedCircuits() {
 }
 
 // --- SEED SEASONS + RESULTS ---
-async function seedSeasonsAndResults() {
-    const seasons = await fetchSeasons()
+async function seedSeasonsAndResults(targetYear = null) {
+    const seasons = targetYear ? [targetYear] : await fetchSeasons()
     console.log(`Found ${seasons.length} seasons to seed...`)
 
     for (const year of seasons) {
@@ -163,6 +163,10 @@ async function seedSeasonsAndResults() {
                 console.error(`Season insert failed for ${year}:`, seasonError)
                 continue
             }
+
+            console.log(`Clearing existing data for ${year} to prevent duplicates...`)
+            await supabase.from('race_results').delete().eq('season_year', parseInt(year))
+            await supabase.from('season_entries').delete().eq('season_year', parseInt(year))
 
             // Race results for the season
             await delay(300)
@@ -221,13 +225,15 @@ async function seedSeasonsAndResults() {
     }
 }
 
-async function seedStandings() {
+async function seedStandings(targetYear = null) {
     console.log('\nSeeding driver standings...')
 
-    const { data: seasons } = await supabase
-        .from('seasons')
-        .select('year')
-        .order('year', { ascending: true })
+    let query = supabase.from('seasons').select('year').order('year', { ascending: true })
+    if (targetYear) {
+        query = query.eq('year', targetYear)
+    }
+
+    const { data: seasons } = await query
 
     for (const { year } of seasons) {
         await delay(1000)
@@ -263,11 +269,29 @@ async function seedStandings() {
 
 // --- RUN ---
 async function main() {
-    //await seedConstructors()
-    //await seedDrivers()
-    //await seedCircuits()
-    //await seedSeasonsAndResults()
-    await seedStandings()
+    const args = process.argv.slice(2);
+    const targetYear = args[0] ? parseInt(args[0]) : null;
+
+    if (targetYear) {
+        console.log(`\n🚀 Updating data ONLY for season ${targetYear}...`)
+    } else {
+        console.log(`\n⚠️ No year specified, updating ALL seasons. This will take a while.`)
+    }
+
+    // Run basic entity updates just in case new drivers/teams debuted mid-season
+    if (targetYear) {
+        await seedConstructors()
+        await seedDrivers()
+        // await seedCircuits() // circuits rarely change mid-season, can leave commented out
+    } else {
+        // await seedConstructors()
+        // await seedDrivers()
+        // await seedCircuits()
+    }
+
+    await seedSeasonsAndResults(targetYear)
+    await seedStandings(targetYear)
+    
     console.log('\n✅ All done!')
 }
 

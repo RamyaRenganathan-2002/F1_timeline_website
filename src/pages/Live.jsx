@@ -61,11 +61,12 @@ export default function Live() {
 
     useEffect(() => {
         async function fetchAll() {
+            const timestamp = Date.now()
             // Driver standings from Jolpica
             const [driversRes, constructorsRes, scheduleRes] = await Promise.all([
-                fetch(`https://api.jolpi.ca/ergast/f1/${CURRENT_YEAR}/driverStandings.json`),
-                fetch(`https://api.jolpi.ca/ergast/f1/${CURRENT_YEAR}/constructorStandings.json`),
-                fetch(`https://api.jolpi.ca/ergast/f1/${CURRENT_YEAR}.json?limit=100`),
+                fetch(`https://api.jolpi.ca/ergast/f1/${CURRENT_YEAR}/driverStandings.json?t=${timestamp}`),
+                fetch(`https://api.jolpi.ca/ergast/f1/${CURRENT_YEAR}/constructorStandings.json?t=${timestamp}`),
+                fetch(`https://api.jolpi.ca/ergast/f1/${CURRENT_YEAR}.json?limit=100&t=${timestamp}`),
             ])
 
             const driversData = await driversRes.json()
